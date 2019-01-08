@@ -1,0 +1,144 @@
+﻿<Page x:Class="PDS_Manager.Pages.Jazda_Page"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:PDS_Manager.Pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="550" d:DesignWidth="1200"
+      Title="Jazda_Page" Loaded="Page_Loaded"
+      >
+    <Page.Resources>
+        <Style x:Key="DeleteButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Width" Value="auto"/>
+            <Setter Property="Foreground" Value="#B2C83504"></Setter>
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="FontSize" Value="15"></Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border  Name="Border" Background="{TemplateBinding Background}">
+                            <ContentPresenter Content="{TemplateBinding Content}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Foreground" Value="#FF4B1D1D"></Setter>
+                                <Setter Property="Cursor" Value="Hand"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <DataGrid x:Name="DataGrid_mainGridJazda" AutoGenerateColumns="False" 
+                    SelectionChanged="DataGrid_mainGridJazda_SelectionChanged" CellEditEnding="DataGrid_mainGridJazda_CellEditEnding"
+                  >
+            <DataGrid.Columns>
+
+                <DataGridTextColumn Header="ID jazdy" Binding="{Binding IdJazdy}" Width="auto" IsReadOnly="True" />
+                <DataGridTextColumn Header="ID rezervacie" Binding="{Binding IdRezervacie}" Width="auto" IsReadOnly="True" />
+                <DataGridTextColumn Header="Najazdené km" Binding="{Binding NajzdeneKm}" Width="auto" />
+                <DataGridTextColumn Header="Rodné číslo" Binding="{Binding RodCislo}" Width="auto" IsReadOnly="True" />
+                <DataGridTextColumn Header="ŠPZ" Binding="{Binding Spz}" Width="auto" IsReadOnly="True" />
+                <DataGridTextColumn Header="Dátum od" Binding="{Binding Od,StringFormat=d}" Width="auto" IsReadOnly="True" />
+                <DataGridTextColumn Header="Dátum do" Binding="{Binding Do,StringFormat=d}" Width="auto" />
+
+                <DataGridTemplateColumn Width="auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Click="ButtonDeleteJazda_Click" Content="X" Style="{StaticResource DeleteButtonStyle}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid x:Name="Grid_Naklady" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid x:Name="Stack" />
+                <Grid>
+                    <Frame x:Name="Frame_mapa"/>
+                </Grid>
+                <Border Grid.Row="1"  BorderBrush="Black" BorderThickness="0,1,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Náklady na jazdu"  Grid.Row="0" HorizontalAlignment="Center"/>
+                        <DataGrid x:Name="DataGrid_Naklady" Grid.Row="1" AutoGenerateColumns="False" ItemsSource="{Binding}" 
+                                  IsReadOnly="True" SelectionChanged="NakladySelectionChanged">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID jazdy" Binding="{Binding IdJazdy}" Width="*"/>
+                                <DataGridTextColumn Header="Popis" Binding="{Binding PopisNakladu}" Width="*"/>
+                                <DataGridTextColumn Header="Hodnota" Binding="{Binding Hodnota, StringFormat=n2}" Width="*"/>
+                                <DataGridTextColumn Header="Dátum" Binding="{Binding Kedy, StringFormat=d}" Width="*"/>
+
+                                <DataGridTemplateColumn Width="auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Click="ButtonDeleteNaklady_Click" Content="X" Style="{StaticResource DeleteButtonStyle}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0"  BorderBrush="Black" BorderThickness="1,0,0,0">
+                    <Image x:Name="FotkaNakladu"/>
+                </Border>
+                
+                <Border Grid.Row="1"  BorderBrush="Black" BorderThickness="1,1,0,0">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Id jazdy"/>
+                        <TextBox Width="150" x:Name="IdJazdy"/>
+                        <TextBlock Text="Typ nákladu"/>
+                        <ComboBox Width="150" x:Name="TypNakladuCombo"/>
+                        <TextBlock Text="Hodnota"/>
+                        <TextBox Width="150" x:Name="Hodnota"/>
+                        <TextBlock Text="Dátum"/>
+                        <DatePicker Width="150" x:Name="Kedy"/>
+                        <Grid Width="300" Grid.Row="1" Margin="20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="250*"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Fotografia nákladu" HorizontalAlignment="Center" Margin="5" />
+                            <Border BorderBrush="Black" BorderThickness="2">
+                                <Image  x:Name="FotkaPridavanehoNakladu"  Height="100" />
+                            </Border>
+                            <StackPanel Grid.Column="1">
+                                <Button Content="Nahraj fotku" Width="100" Margin="5"  Height="20" Click="PridajFotku"/>
+                                <Button Content="Pridaj náklad" Width="100" Margin="5,25,5,0" Grid.Column="1" Height="20" Click="PridajNakladClick"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>

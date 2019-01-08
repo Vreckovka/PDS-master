@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PDS_Manager"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" MinWidth="1250" MinHeight="650">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -13,97 +13,29 @@
         </Grid.RowDefinitions>
 
         <Menu>
+            <MenuItem Header="Vodiči">
+                <MenuItem Header="Zobraz všetkých vodičov" Click="VsetciVodici_Click"/>
+                <MenuItem Header="Pridaj vodica" Click="PridajVodica_Click"/>
+            </MenuItem>
             <MenuItem Header="Evidencia vozidiel">
                 <MenuItem Header="Zobraz všetky vozidlá v evidencii"  Click="VsetkyVozidla_Click"/>
+                <MenuItem Header="Pridaj vozidlo do evidenceie" Click="PridajVozidlo_Click"/>
             </MenuItem>
             <MenuItem Header="Jazdy">
                 <MenuItem Header="Zobraz všetky jazdy" Click="VsetkyJazdy_Click"/>
+                <MenuItem Header="Pridaj jazdu" Click="PridajJazdu_Click"/>
             </MenuItem>
-            <MenuItem Header="Vozidla">
-                <MenuItem Header="Zobraz všetky vozidla" Click="VsetkyVozidla_Click"/>
+            <MenuItem Header="Rezervacie">
+                <MenuItem Header="Zobraz všetky rezervacie" Click="VsetkyRezervacie_Click"/>
+                <MenuItem Header="Pridaj rezervaciu" Click="PridajRezervaciu_Click"/>
             </MenuItem>
+            
+            <MenuItem Header="Zobraz štatistiky" Click="ZobrazStatistiky_Click"/>
+            <MenuItem Header="Vytovoriť xml report" Click="XML_Click"/>
         </Menu>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <Grid Grid.Column="0">
-                <DataGrid x:Name="DataGrid_mainGridVozdila" AutoGenerateColumns="False" ItemsSource="{Binding}"
-                          SelectionChanged="DataGrid_mainGridVozdila_SelectionChanged">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="ŠPZ" Binding="{Binding SPZ}" Width="*"/>
-                        <DataGridTextColumn Header="Značka" Binding="{Binding ZNACKA}"  Width="*"/>
-                        <DataGridTextColumn Header="Model" Binding="{Binding MODEL}"  Width="*" />
-                        <DataGridTextColumn Header="Rok výroby" Binding="{Binding ROK_VYROBY}"  Width="*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-
-                <DataGrid x:Name="DataGrid_mainGridJazda" AutoGenerateColumns="False" ItemsSource="{Binding}"
-                           SelectionChanged="DataGrid_mainGridJazda_SelectionChanged" IsReadOnly="True">
-                    <DataGrid.Columns>
-
-                        <DataGridTextColumn Header="ID rezervacie" Binding="{Binding ID_REZERVACIE}" Width="*"/>
-                        <DataGridTextColumn Header="MENO" Binding="{Binding MENO}" Width="*"/>
-                        <DataGridTextColumn Header="PRIEZVISKO" Binding="{Binding PRIEZVISKO}" Width="*"/>
-                        <DataGridTextColumn Header="ŠPZ" Binding="{Binding SPZ}" Width="*"/>
-                        <DataGridTextColumn Header="Najazdene km" Binding="{Binding NAJAZDENE_KM}" Width="*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-
-                <DataGrid x:Name="DataGrid_mainGridRezervacia" AutoGenerateColumns="False" ItemsSource="{Binding}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="ŠPZ" Binding="{Binding SPZ}" Width="*"/>
-                        <DataGridTextColumn Header="Značka" Binding="{Binding ZNACKA}" Width="*"/>
-                        <DataGridTextColumn Header="Model" Binding="{Binding MODEL}" Width="*"/>
-                        <DataGridTextColumn Header="Rok výroby" Binding="{Binding ROK_VYROBY}" Width="*" />
-                    </DataGrid.Columns>
-                </DataGrid>
-
-                <DataGrid x:Name="DataGrid_mainGridVodic" AutoGenerateColumns="False" ItemsSource="{Binding}" 
-                          IsReadOnly="True">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="ŠPZ" Binding="{Binding SPZ}" Width="*"/>
-                        <DataGridTextColumn Header="Značka" Binding="{Binding ZNACKA}" Width="*"/>
-                        <DataGridTextColumn Header="Model" Binding="{Binding MODEL}" Width="*"/>
-                        <DataGridTextColumn Header="Rok výroby" Binding="{Binding ROK_VYROBY}" Width="*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
-
-
-
-            <Grid Grid.Column="1">
-                <ScrollViewer CanContentScroll="True">
-                    <Grid x:Name="Grid_Naklady">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <Grid x:Name="Stack" />
-                        
-                        <Grid>
-                            <Frame x:Name="Frame_mapa"/>
-                        </Grid>
-
-                        <DataGrid x:Name="DataGrid_Naklady" Grid.Row="1" AutoGenerateColumns="False" ItemsSource="{Binding}" IsReadOnly="True">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="ID jazdy" Binding="{Binding ID_JAZDY}" Width="*"/>
-                                <DataGridTextColumn Header="Hodnota" Binding="{Binding HODNOTA}" Width="*"/>
-                                <DataGridTextColumn Header="Popis" Binding="{Binding POPIS}" Width="*"/>
-                                <DataGridTextColumn Header="Dátum" Binding="{Binding KEDY, StringFormat=d}" Width="*"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
-                </ScrollViewer>
-
-                <ScrollViewer CanContentScroll="True">
-                        <StackPanel x:Name="Grid_VozidlaFotky" />
-                </ScrollViewer>
-                
-            </Grid>
-        </Grid>
+        <Frame x:Name="Frame_Main" Grid.Row="1" NavigationUIVisibility="Hidden"/>
+        
+       
     </Grid>
 </Window>

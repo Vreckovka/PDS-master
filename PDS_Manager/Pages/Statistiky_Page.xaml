@@ -1,0 +1,147 @@
+﻿<Page x:Class="PDS_Manager.Pages.Statistiky_Page"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:PDS_Manager.Pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="Statistiky_Page" Loaded="Page_Loaded"
+      >
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <TextBlock Text="5 vodičov s najviac najazdených km " HorizontalAlignment="Center"/>
+            <DataGrid x:Name="TopKM" AutoGenerateColumns="False" ItemsSource="{Binding}" 
+                  IsReadOnly="True"
+                      Grid.Row="1">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Meno" Binding="{Binding RNK}" Width="*"/>
+                    <DataGridTextColumn Header="Meno" Binding="{Binding MENO}" Width="*"/>
+                    <DataGridTextColumn Header="Priezvisko" Binding="{Binding PRIEZVISKO}" Width="*"/>
+                    <DataGridTextColumn Header="Počet kilometrov" Binding="{Binding KM}" Width="*" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="5 vozidiel s najviac najazdených km " HorizontalAlignment="Center"/>
+            <DataGrid x:Name="TopKMVoz" AutoGenerateColumns="False" ItemsSource="{Binding}" 
+                  IsReadOnly="True" Grid.Row="1">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ŠPZ" Binding="{Binding SPZ}" Width="*"/>
+                    <DataGridTextColumn Header="Značka" Binding="{Binding ZNACKA}" Width="*"/>
+                    <DataGridTextColumn Header="Model" Binding="{Binding MODEL}" Width="*"/>
+                    <DataGridTextColumn Header="Počet kilometrov" Binding="{Binding KM}" Width="*" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Náklady na km pre jednotlivé vozidlá" HorizontalAlignment="Center"/>
+            <DataGrid x:Name="PomerEurKM" AutoGenerateColumns="False" ItemsSource="{Binding}" 
+                  IsReadOnly="True" Grid.Row="1">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ŠPZ" Binding="{Binding SPZ}" Width="*"/>
+                    <DataGridTextColumn Header="Značka" Binding="{Binding ZNACKA}" Width="*"/>
+                    <DataGridTextColumn Header="Model" Binding="{Binding MODEL}" Width="*"/>
+                    <DataGridTextColumn Header="€/Km" Binding="{Binding POMER, StringFormat={}{0:n2} €/KM}" Width="*" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Priemerne náklady na jazdu pre jednotlivých vodicov" HorizontalAlignment="Center"/>
+            <DataGrid x:Name="PriemerVodicov" AutoGenerateColumns="False" ItemsSource="{Binding}" 
+                  IsReadOnly="True" Grid.Row="1">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Meno" Binding="{Binding MENO}" Width="*"/>
+                    <DataGridTextColumn Header="Priezvisko" Binding="{Binding PRIEZVISKO}" Width="*"/>
+                    <DataGridTextColumn Header="Priemerné náklady" Binding="{Binding PRIEMER}" Width="*" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <Grid Grid.Column="1" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Mesačné náklady na pohonné hmoty pre vozidlá" HorizontalAlignment="Center"/>
+            <DataGrid x:Name="MesacneNaklady" AutoGenerateColumns="False" ItemsSource="{Binding}" 
+                  IsReadOnly="True" Grid.Row="1">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Špz" Binding="{Binding SPZ}" Width="*"/>
+                    <DataGridTextColumn Header="Model" Binding="{Binding MODEL}" Width="*"/>
+                    <DataGridTextColumn Header="Značka" Binding="{Binding ZNACKA}" Width="*" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Dátum" Binding="{Binding DATUM, StringFormat=d}" Width="*" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <Grid Grid.Column="1" Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Najcastejšie rezervované vozidlá v danom roku" HorizontalAlignment="Center"/>
+            <DataGrid x:Name="RezervovaneVozidla" AutoGenerateColumns="False" ItemsSource="{Binding}" 
+                  IsReadOnly="True" Grid.Row="1">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Špz" Binding="{Binding SPZ}" Width="*"/>
+                    <DataGridTextColumn Header="Rok" Binding="{Binding ROK, StringFormat=yyyy}" Width="*" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Počet rezervácii" Binding="{Binding POCET}" Width="*" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <Grid Grid.Column="0" Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Vozidla s nadpriemerným počtom najzdených km" HorizontalAlignment="Center"/>
+            <TextBlock Text="priemer" HorizontalAlignment="Center" x:Name="Priemer" Grid.Row="1"/>
+            <DataGrid x:Name="Nadpriemerne" AutoGenerateColumns="False" ItemsSource="{Binding}" 
+                  IsReadOnly="True" Grid.Row="2">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Špz" Binding="{Binding SPZ}" Width="*"/>
+                    <DataGridTextColumn Header="Model" Binding="{Binding MODEL}" Width="*" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Značka" Binding="{Binding ZNACKA}" Width="*" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Počet km" Binding="{Binding KM}" Width="*" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+    </Grid>
+</Page>

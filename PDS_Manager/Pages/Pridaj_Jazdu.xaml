@@ -1,0 +1,25 @@
+﻿<Page x:Class="PDS_Manager.Pages.Pridaj_Jazdu"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:PDS_Manager.Pages"
+      mc:Ignorable="d" 
+      Title="Pridaj_Jazdu">
+
+    <Grid>
+        <StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="20">
+                <TextBlock Text="ID rezervácie" HorizontalAlignment="Center" Margin="5"/>
+                <TextBox Width="150" Margin="5" x:Name="Rezervacia"/>
+                <TextBlock Text="Najazdené km" HorizontalAlignment="Center" Margin="5"/>
+                <TextBox Width="150" Margin="5" x:Name="Km"/>
+                <TextBlock Text="Dátum od" HorizontalAlignment="Center" Margin="5"/>
+                <DatePicker x:Name="Od"/>
+                <TextBlock Text="Dátum do" HorizontalAlignment="Center" Margin="5"/>
+                <DatePicker x:Name="do"/>
+            </StackPanel>
+            <Button Content="Pridaj jazdu" Width="150" Margin="40" Click="PridajJazduClick"/>
+        </StackPanel>
+    </Grid>
+</Page>

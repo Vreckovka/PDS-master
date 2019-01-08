@@ -1,0 +1,51 @@
+﻿<Page x:Class="PDS_Manager.Pages.PridajVozidlo"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:PDS_Manager.Pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="850"
+      Title="PridajVozidlo" Loaded="Page_Loaded"
+      >
+
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="SPZ" HorizontalAlignment="Center" Margin="5"/>
+            <TextBox Width="150" Margin="5" x:Name="SPZ"/>
+            <TextBlock Text="Znacka" HorizontalAlignment="Center" Margin="5"/>
+            <TextBox Width="150" Margin="5" x:Name="Znacka"/>
+            <TextBlock Text="Model" HorizontalAlignment="Center" Margin="5"/>
+            <TextBox Width="150" Margin="5" x:Name="Model"/>
+            <TextBlock Text="Rok výroby" HorizontalAlignment="Center" Margin="5"/>
+            <TextBox Width="150" Margin="5" x:Name="RokVyroby"/>
+
+
+        </StackPanel>
+
+        <Grid Width="300" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel HorizontalAlignment="Center">
+                <TextBlock Text="Fotografie vozidla" HorizontalAlignment="Center" Margin="5"/>
+                <Border BorderBrush="Black" BorderThickness="2">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Orientation="Horizontal" x:Name="FotkyVozidla" Height="120" />
+                    </ScrollViewer>
+                </Border>
+                <Button Content="Nahraj fotku" Width="100" Margin="5" Grid.Column="1" Height="20" Click="PridajFotku" HorizontalAlignment="Center"/>
+            </StackPanel>
+
+        </Grid>
+        <Button Content="Pridaj" Width="150" Margin="5"  Grid.Row="2" Click="PridajVozidloClick"/>
+    </Grid>
+</Page>

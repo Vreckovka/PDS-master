@@ -27,28 +27,62 @@ namespace Generator
             orcl.Open();
             geocodingProvider = GMap.NET.MapProviders.OpenStreetMapProvider.Instance;
 
+            DataTable vodici = new DataTable();
+            using (OracleCommand cmd = new OracleCommand("select rod_cislo from vodic", orcl))
+            {
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    vodici = new DataTable();
+                    vodici.Load(reader);
+                }
+            }
+
+      
+            DataTable rezervacie = new DataTable();
+            OracleDataAdapter sqlDa = new OracleDataAdapter();
+            sqlDa.SelectCommand = new OracleCommand("select * from rezervacia", orcl);
+            OracleCommandBuilder cb = new OracleCommandBuilder(sqlDa);
+            sqlDa.Fill(rezervacie);
+
+            int i = 0;
+            foreach (DataRow dataRow in rezervacie.Rows)
+            {
+                dataRow["rod_cislo"] = vodici.Rows[random.Next(0, vodici.Rows.Count)].ItemArray[0];
+
+                if (i % 100 == 0)
+                {
+                    sqlDa.Update(rezervacie);
+                    Console.WriteLine("Zmena " + i);
+                }
+                i++;
+            }
+
+            var ints = sqlDa.Update(rezervacie);
+
+          
+
             //PridajPolohy();
             //PridajFotkyVozidiel();
 
-            // DataTable jazdy = new DataTable();
-            // OracleDataAdapter sqlDa = new OracleDataAdapter();
-            // sqlDa.SelectCommand = new OracleCommand("select dat_od,dat_do,id_rezervacie from rezervacia where dat_do is not null", orcl);
-            // OracleCommandBuilder cb = new OracleCommandBuilder(sqlDa);
-            // sqlDa.Fill(jazdy);
+            //DataTable jazdy = new DataTable();
+            //OracleDataAdapter sqlDa = new OracleDataAdapter();
+            //sqlDa.SelectCommand = new OracleCommand("select dat_od,dat_do,id_rezervacie from rezervacia where dat_do is not null", orcl);
+            //OracleCommandBuilder cb = new OracleCommandBuilder(sqlDa);
+            //sqlDa.Fill(jazdy);
 
-            // foreach (DataRow dataRow in jazdy.Rows)
-            // {
-            //     DateTime starDate = RandomDate(new DateTime(2000, 1, 1), new DateTime(2018, 12, 31));
-            //     dataRow["dat_od"] = starDate;
-            //     dataRow["dat_do"] = RandomDate(starDate, new DateTime(2018, 12, 31));
-            // }
+            //foreach (DataRow dataRow in jazdy.Rows)
+            //{
+            //    DateTime starDate = RandomDate(new DateTime(2000, 1, 1), new DateTime(2018, 12, 31));
+            //    dataRow["dat_od"] = starDate;
+            //    dataRow["dat_do"] = RandomDate(starDate, new DateTime(2018, 12, 31));
+            //}
 
             //var ints = sqlDa.Update(jazdy);
 
-            PridajFotkyVozidiel();
-              
+
+
         }
-        static List<Mesto> Mestos = new List<Mesto>(); 
+        static List<Mesto> Mestos = new List<Mesto>();
         public class Mesto
         {
             public Mesto(string nazov, string pSC)
@@ -63,7 +97,7 @@ namespace Generator
             {
                 for (int i = 0; i < pocet; i++)
                 {
-                    Ulice.Add(ulice[random.Next(0,ulice.Count)]);
+                    Ulice.Add(ulice[random.Next(0, ulice.Count)]);
                 }
             }
 
@@ -78,7 +112,7 @@ namespace Generator
             NacitajUlice();
 
 
-            for(int i = 0; i < mesta.Count; i++)
+            for (int i = 0; i < mesta.Count; i++)
             {
                 Mestos.Add(new Mesto(mesta[i], random.Next(0, 10000).ToString("00000")));
             }
@@ -99,7 +133,7 @@ namespace Generator
 
             for (int i = 0; i < vodici.Rows.Count; i++)
             {
-                
+
                 OracleCommand objCmd = new OracleCommand();
                 objCmd.Connection = orcl;
                 objCmd.CommandText = "PridajAdresu";
@@ -120,7 +154,7 @@ namespace Generator
                 Mesto mesto1 = Mestos[random.Next(0, Mestos.Count)];
 
                 objCmd.Parameters["rod_cislo"].Value = vodici.Rows[i].ItemArray[0];
-                objCmd.Parameters["cisloDomu"].Value = random.Next(1,1000);
+                objCmd.Parameters["cisloDomu"].Value = random.Next(1, 1000);
                 objCmd.Parameters["ulica"].Value = mesto1.Ulice[random.Next(0, mesto1.Ulice.Count)];
                 objCmd.Parameters["mesto"].Value = mesto1.Nazov;
                 objCmd.Parameters["psc"].Value = mesto1.PSC;
@@ -135,9 +169,9 @@ namespace Generator
 
         public static void PridajPolohy()
         {
-            NacitajMesta();
+
             DataTable jazdy = new DataTable();
-            using (OracleCommand cmd = new OracleCommand("select id_jazdy,dat_od, dat_do from jazda join rezervacia using(id_rezervacie)", orcl))
+            using (OracleCommand cmd = new OracleCommand("select id_jazdy,datJazd_od, datJazd_do from jazda", orcl))
             {
                 using (OracleDataReader reader = cmd.ExecuteReader())
                 {
@@ -149,60 +183,41 @@ namespace Generator
 
             for (int i = 0; i < jazdy.Rows.Count; i++)
             {
+                DateTime pom = Convert.ToDateTime(jazdy.Rows[i].ItemArray[1]);
 
-                try
+                while (pom <= Convert.ToDateTime(jazdy.Rows[i].ItemArray[2]))
                 {
-                    var sql = "INSERT INTO Poloha (cas_zaznamu, id_jazdy, zem_sirka, zem_dlzka) " +
-                              "VALUES (:cas_zaznamu, :id_jazdy, :zem_sirka,:zem_dlzka)";
-
-                    using (OracleCommand command = new OracleCommand(sql, orcl))
+                    try
                     {
-                        if (jazdy.Rows[i].ItemArray[2] != DBNull.Value)
+                        var sql = "INSERT INTO Poloha (cas_zaznamu, id_jazdy, zem_sirka, zem_dlzka) " +
+                                  "VALUES (:cas_zaznamu, :id_jazdy, :zem_sirka,:zem_dlzka)";
+
+                        using (OracleCommand command = new OracleCommand(sql, orcl))
+                        {
+
                             command.Parameters.Add("cas_zaznamu",
-                               RandomDateWithTime(Convert.ToDateTime(jazdy.Rows[i].ItemArray[1]),
-                                   Convert.ToDateTime(jazdy.Rows[i].ItemArray[2])));
-                        else
-                            command.Parameters.Add("cas_zaznamu",
-                                RandomDateWithTime(Convert.ToDateTime(jazdy.Rows[i].ItemArray[1]),
-                                    DateTime.Today));
+                               RandomDateWithTime(pom, pom.AddHours(8)));
 
-                        command.Parameters.Add("id_jazdy", jazdy.Rows[i].ItemArray[0]);
+                            command.Parameters.Add("id_jazdy", jazdy.Rows[i].ItemArray[0]);
 
-                        command.Parameters.Add("zem_sirka", random.NextDouble() * (49.8 - 48) + 48);
-                        command.Parameters.Add("zem_dlzka", random.NextDouble() * (17 - 15) + 15);
+                            command.Parameters.Add("zem_sirka", random.NextDouble() * (49.8 - 48) + 48);
+                            command.Parameters.Add("zem_dlzka", random.NextDouble() * (17 - 15) + 15);
 
-                        command.ExecuteNonQuery();
+                            pom = pom.AddHours(8);
+                            command.ExecuteNonQuery();
+
+                        }
+
+
 
                     }
-
-                    using (OracleCommand command = new OracleCommand(sql, orcl))
+                    catch (Exception ex)
                     {
-                        if (jazdy.Rows[i].ItemArray[2] != DBNull.Value)
-                            command.Parameters.Add("cas_zaznamu",
-                                RandomDateWithTime(Convert.ToDateTime(jazdy.Rows[i].ItemArray[1]),
-                                    Convert.ToDateTime(jazdy.Rows[i].ItemArray[2])));
-                        else
-                            command.Parameters.Add("cas_zaznamu",
-                                RandomDateWithTime(Convert.ToDateTime(jazdy.Rows[i].ItemArray[1]),
-                                    DateTime.Today));
-
-                        command.Parameters.Add("id_jazdy", jazdy.Rows[i].ItemArray[0]);
-
-                        command.Parameters.Add("zem_sirka", random.NextDouble() * (49.8 - 48) + 48);
-                        command.Parameters.Add("zem_dlzka", random.NextDouble() * (17 - 15) + 15);
-
-                        command.ExecuteNonQuery();
-
+                        Console.WriteLine(ex.Message);
                     }
-
-                    Console.WriteLine($"Poloha pridana {i}");
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
+                Console.WriteLine($"Poloha pridana {i}");
             }
-
         }
         public static void NacitajMesta()
         {
@@ -219,7 +234,7 @@ namespace Generator
         public static void PridajJazdy()
         {
             DataTable rezervacie = new DataTable();
-            using (OracleCommand cmd = new OracleCommand("select id_rezervacie from Rezervacia", orcl))
+            using (OracleCommand cmd = new OracleCommand("select id_rezervacie,dat_od,dat_do from Rezervacia", orcl))
             {
                 using (OracleDataReader reader = cmd.ExecuteReader())
                 {
@@ -227,28 +242,52 @@ namespace Generator
                     rezervacie.Load(reader);
                 }
             }
-
+            int index = 0;
             for (int i = 0; i < rezervacie.Rows.Count; i++)
             {
+                DateTime dateTimeRezStart = Convert.ToDateTime(rezervacie.Rows[i].ItemArray[1]);
+                DateTime dateTimeRezEnd = Convert.ToDateTime(rezervacie.Rows[i].ItemArray[2]);
+                DateTime pom = dateTimeRezStart;
 
-                var sql = "INSERT INTO Jazda (id_jazdy, id_rezervacie,najazdene_km) " +
-                          "VALUES (:id_jazdy, :id_rezervacie, :najazdene_km)";
-
-                using (OracleCommand command = new OracleCommand(sql, orcl))
+                while (true)
                 {
-                    command.Parameters.Add("id_jazdy", i);
-                    command.Parameters.Add("id_rezervacie", rezervacie.Rows[i].ItemArray[0]);
-                    command.Parameters.Add("najazdene_km", random.Next(50, 1000));
+                    var sql = "INSERT INTO Jazda (id_jazdy, id_rezervacie,datJazd_od,datJazd_do,najazdene_km) " +
+                              "VALUES (:id_jazdy, :id_rezervacie,:datJazd_od, :datJazd_do ,:najazdene_km)";
 
-                    command.ExecuteNonQuery();
 
+                    if (random.Next(0, 100) > 20)
+                    {
+                        using (OracleCommand command = new OracleCommand(sql, orcl))
+                        {
+                            command.Parameters.Add("id_jazdy", index);
+                            command.Parameters.Add("id_rezervacie", rezervacie.Rows[i].ItemArray[0]);
+                            command.Parameters.Add("datJazd_od", pom);
+
+                            int pocetDni = random.Next(1, 3);
+
+                            if (pom.AddDays(pocetDni) < dateTimeRezEnd)
+                            {
+                                command.Parameters.Add("datJazd_do", pom.AddDays(pocetDni));
+                                index++;
+                            }
+
+                            else
+                                break;
+
+                            command.Parameters.Add("najazdene_km", random.Next(50, 1000));
+                            pom = pom.AddDays(pocetDni);
+
+                            command.ExecuteNonQuery();
+
+                        }
+                    }
                 }
 
                 Console.WriteLine($"Jazda pridana {i}");
             }
 
         }
-        public static void PridajRezervacie(int pocet)
+        public static void PridajRezervacie()
         {
             DataTable rod_cisla = new DataTable();
             using (OracleCommand cmd = new OracleCommand("select rod_cislo from Vodic", orcl))
@@ -270,32 +309,40 @@ namespace Generator
                 }
             }
 
-            for (int i = 0; i < pocet; i++)
+
+            int index = 0;
+            for (int i = 0; i < spz.Rows.Count; i++)
             {
-                string spzRandom = (string)spz.Rows[random.Next(0, spz.Rows.Count)].ItemArray[0];
+                string spzRandom = (string)spz.Rows[i].ItemArray[0];
                 string rcRandom = (string)rod_cisla.Rows[random.Next(0, rod_cisla.Rows.Count)].ItemArray[0];
+                DateTime dateTimeStart = new DateTime(2000, 1, 1);
 
-                var sql = "INSERT INTO Rezervacia (id_rezervacie, spz,rod_cislo,dat_od,dat_do) " +
-                          "VALUES (:id_rezervacie, :spz, :rod_cislo, :dat_od,:dat_do)";
-
-                using (OracleCommand command = new OracleCommand(sql, orcl))
+                while (dateTimeStart < new DateTime(2019, 2, 5))
                 {
-                    command.Parameters.Add("id_rezervacie", i);
-                    command.Parameters.Add("spz", spzRandom);
-                    command.Parameters.Add("rod_cislo", rcRandom);
-                    command.Parameters.Add("dat_od", RandomDate(new DateTime(2000, 1, 1), new DateTime(2018, 12, 31)));
+                    var sql = "INSERT INTO Rezervacia (id_rezervacie, spz,rod_cislo,dat_od,dat_do) " +
+                              "VALUES (:id_rezervacie, :spz, :rod_cislo, :dat_od,:dat_do)";
 
-                    if (random.Next(0, 100) > 10)
+                    using (OracleCommand command = new OracleCommand(sql, orcl))
+                    {
+                        command.Parameters.Add("id_rezervacie", index);
+                        command.Parameters.Add("spz", spzRandom);
+                        command.Parameters.Add("rod_cislo", rcRandom);
+                        command.Parameters.Add("dat_od", dateTimeStart);
+
+                        var pomDate = dateTimeStart.AddDays(random.Next(3, 20));
                         command.Parameters.Add("dat_do",
-                            RandomDate(new DateTime(2000, 1, 1), new DateTime(2018, 12, 31)));
-                    else
-                        command.Parameters.Add("dat_do", null);
+                            RandomDate(dateTimeStart, pomDate));
 
-                    command.ExecuteNonQuery();
-
+                        if (random.Next(0, 100) > 40)
+                        {
+                            index++;
+                            command.ExecuteNonQuery();
+                        }
+                        dateTimeStart = pomDate;
+                    }
                 }
 
-                Console.WriteLine($"Rezervacia pridana {i}");
+                Console.WriteLine($"Rezervacia pridana {index}");
             }
         }
 
@@ -310,8 +357,7 @@ namespace Generator
 
         public static DateTime RandomDateWithTime(DateTime startDate, DateTime endDate)
         {
-            TimeSpan timeSpan = endDate - startDate;
-            TimeSpan newSpan = new TimeSpan(0, random.Next(0, (int)timeSpan.TotalMinutes), 0);
+            TimeSpan newSpan = new TimeSpan(0, random.Next(1, 1440 - startDate.Minute), 0);
             DateTime newDate = startDate + newSpan;
             return newDate;
 
@@ -371,10 +417,10 @@ namespace Generator
                     else
                     {
                         objCmd.Parameters["kedyP"].Value = RandomDate(Convert.ToDateTime(jazdy.Rows[i].ItemArray[1]),
-                           new DateTime(2018,12,31));
+                           new DateTime(2018, 12, 31));
                     }
 
-                    objCmd.Parameters["fotka"].Value = nazvyTypov[random.Next(0,nazvyTypov.Length)] + ".png";
+                    objCmd.Parameters["fotka"].Value = nazvyTypov[random.Next(0, nazvyTypov.Length)] + ".png";
 
                     objCmd.ExecuteNonQuery();
 
@@ -398,31 +444,22 @@ namespace Generator
             for (int i = 0; i < vozidla.Rows.Count; i++)
             {
                 byte[] foto;
-              
+
 
                 OracleCommand objCmd = new OracleCommand();
                 objCmd.Connection = orcl;
-                objCmd.CommandText = "insertFotkaVozidla";
+                objCmd.CommandText = "PridajFotkuAuta";
                 objCmd.CommandType = CommandType.StoredProcedure;
-                OracleParameter id = new OracleParameter("id", OracleDbType.Char);
-                OracleParameter spz = new OracleParameter("spz", OracleDbType.Varchar2);
-                OracleParameter fotka = new OracleParameter("fotka", OracleDbType.Blob);
+                OracleParameter id = new OracleParameter("pSpz", OracleDbType.Varchar2);
+                OracleParameter fotka = new OracleParameter("pFotka", OracleDbType.Blob);
 
                 objCmd.Parameters.Add(id);
-                objCmd.Parameters.Add(spz);
                 objCmd.Parameters.Add(fotka);
 
-                objCmd.Parameters["id"].Value = i;
-                objCmd.Parameters["spz"].Value = vozidla.Rows[i].ItemArray[0];
-              
-                // objCmd.Parameters["fotka"].Value = vozidla.Rows[i].ItemArray[1].ToString().Replace('Š', 'S') + vozidla.Rows[i].ItemArray[2].ToString() + ".png";
-                string nazov = vozidla.Rows[i].ItemArray[1].ToString().Replace('Š', 'S') + vozidla.Rows[i].ItemArray[2].ToString() + ".png";
+                objCmd.Parameters["pSpz"].Value = i;
+                objCmd.Parameters["pFotka"].Value = File.ReadAllBytes("vp/" + fotkyVodicov[random.Next(0, fotkyVodicov.Length)] + ".jpg"); ;
 
-                Bitmap bitmap = new Bitmap(@"C:\Users\pecho\Desktop\Auta\" + nazov);
-                ImageConverter converter = new ImageConverter();
-                foto = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
 
-                objCmd.Parameters["fotka"].Value = foto;
                 objCmd.ExecuteNonQuery();
 
                 Console.WriteLine("Fotka vozidla pridana " + i);
@@ -432,23 +469,34 @@ namespace Generator
         public static void PridajVozidla(int pocet)
         {
 
-            string[] znacky = new string[] { "Subaru", "Suzuki", "Volvo", "Volkswagen", "Audi", "BMW", "Citroen", "Dacia", "Fiat", "Škoda" };
+            string[] znacky = new string[] { "Subaru", "Seat", "Volvo", "Volkswagen",
+                "Audi", "Ford", "Citroen", "Dacia", "Fiat",
+                "Škoda","Mercedes","Peugeot" };
             for (int i = 0; i < pocet; i++)
             {
 
-                var sql = "INSERT INTO Vozidla (spz, znacka,model,rok_vyroby) " +
-                          "VALUES (:spz, :znacka, :model, :rok_vyroby)";
 
-                using (OracleCommand command = new OracleCommand(sql, orcl))
-                {
-                    command.Parameters.Add("spz", GetRandomSPZ());
-                    command.Parameters.Add("znacka", znacky[random.Next(0, znacky.Length)]);
-                    command.Parameters.Add("model", random.Next(0, 5));
-                    command.Parameters.Add("rok_vyroby", new DateTime(random.Next(2001, 2017), 1, 1));
-                    command.ExecuteNonQuery();
+                OracleCommand objCmd = new OracleCommand();
+                objCmd.Connection = orcl;
+                objCmd.CommandText = "insertVozidloBezFotky";
+                objCmd.CommandType = CommandType.StoredProcedure;
 
-                }
+                OracleParameter spz = new OracleParameter("spz", OracleDbType.Char);
+                OracleParameter znacka = new OracleParameter("znacka", OracleDbType.Varchar2);
+                OracleParameter model = new OracleParameter("model", OracleDbType.Varchar2);
+                OracleParameter rok_vyroby = new OracleParameter("rok_vyroby", OracleDbType.Int32);
 
+                objCmd.Parameters.Add(spz);
+                objCmd.Parameters.Add(znacka);
+                objCmd.Parameters.Add(model);
+                objCmd.Parameters.Add(rok_vyroby);
+
+                objCmd.Parameters["spz"].Value = GetRandomSPZ();
+                objCmd.Parameters["znacka"].Value = znacky[random.Next(0, znacky.Length)];
+                objCmd.Parameters["model"].Value = random.Next(0, 5);
+                objCmd.Parameters["rok_vyroby"].Value = random.Next(2000, 2000);
+
+                objCmd.ExecuteNonQuery();
                 Console.WriteLine("Vozidlo pridane");
 
             }
@@ -472,7 +520,7 @@ namespace Generator
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        public static void PridajNaklady()
+        public static void PridajNakladyTypy()
         {
             string[] naklady = new string[] { "Tankovanie", "Pokuta", "Mýto", "Poistenie", "Oprava" };
             for (int i = 0; i < naklady.Length; i++)
@@ -491,15 +539,15 @@ namespace Generator
                 Console.WriteLine("Typ_nakladov pridany");
             }
         }
-        static List<string[]> mena = new List<string[]>();
+        static List<string> mena = new List<string>();
         public static void NacitajMena()
         {
-            using (StreamReader streamReader = new StreamReader("mena_gen.txt"))
+            using (StreamReader streamReader = new StreamReader("names.txt"))
             {
                 while (!streamReader.EndOfStream)
                 {
                     var meno = streamReader.ReadLine();
-                    mena.Add(meno.Split(' '));
+                    mena.Add(meno);
                 }
             }
         }
@@ -518,39 +566,149 @@ namespace Generator
         }
 
         static Random random = new Random();
-
-        static int[] fotkyVodicov = new int[] { 1, 2, 3, 4, 5 };
-        public static void PridajVodicov()
+        public static long GetRnadomRc()
         {
-            for (int i = 0; i < mena.Count; i++)
+            DateTime dateTime = RandomDate(new DateTime(1970, 1, 1), new DateTime(1999, 12, 31));
+            string bla = "";
+
+            if (random.Next(0, 100) < 50)
             {
 
-                string[] meno = mena[i];
+                bla = dateTime.ToString("yy") + (dateTime.Month + 50) + dateTime.ToString("dd") + "0000";
+            }
+            else
+            {
+                bla = dateTime.ToString("yyMMdd") + "0000";
+            }
+            long a = Convert.ToInt64(bla);
+            long b = a % 11;
 
-                OracleCommand objCmd = new OracleCommand();
-                objCmd.Connection = orcl;
-                objCmd.CommandText = "insertVodic";
-                objCmd.CommandType = CommandType.StoredProcedure;
-                OracleParameter id = new OracleParameter("rc", OracleDbType.Char);
-                OracleParameter menoP = new OracleParameter("m", OracleDbType.Varchar2);
-                OracleParameter priezvisko = new OracleParameter("p", OracleDbType.Varchar2);
-                OracleParameter fotka = new OracleParameter("foto", OracleDbType.Varchar2);
+            a += 11 - b;
+            return a;
 
-                objCmd.Parameters.Add(id);
-                objCmd.Parameters.Add(menoP);
-                objCmd.Parameters.Add(priezvisko);
-                objCmd.Parameters.Add(fotka);
+        }
+        static int[] fotkyVodicov = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        public static void PridajVodicov()
+        {
+            NacitajMena();
+            VytvorMesta();
 
-                objCmd.Parameters["rc"].Value = i.ToString("0000000000");
-                objCmd.Parameters["m"].Value = meno[0];
-                objCmd.Parameters["p"].Value = meno[1];
-                objCmd.Parameters["foto"].Value = "vp" + fotkyVodicov[random.Next(0, fotkyVodicov.Length)] + ".png";
+            for (int i = 0; i < 10000; i++)
+            {
+                int rc = 0;
+                long blaRc = GetRnadomRc();
 
-                objCmd.ExecuteNonQuery();
+                while (true)
+                {
 
+                    OracleCommand objCmd = new OracleCommand();
+                    objCmd.Connection = orcl;
+                    objCmd.CommandText = "insertVodic";
+                    objCmd.CommandType = CommandType.StoredProcedure;
+                    OracleParameter id = new OracleParameter("rc", OracleDbType.Char);
+                    OracleParameter menoP = new OracleParameter("meno", OracleDbType.Varchar2);
+                    OracleParameter priezvisko = new OracleParameter("priezv", OracleDbType.Varchar2);
+                    OracleParameter cisloDomu = new OracleParameter("cisloDomu", OracleDbType.Int32);
+                    OracleParameter ulica = new OracleParameter("ulica", OracleDbType.Varchar2);
+                    OracleParameter mesto = new OracleParameter("mesto", OracleDbType.Varchar2);
+                    OracleParameter psc = new OracleParameter("psc", OracleDbType.Char);
+                    OracleParameter fotka = new OracleParameter("foto", OracleDbType.Blob);
+
+                    objCmd.Parameters.Add(id);
+                    objCmd.Parameters.Add(menoP);
+                    objCmd.Parameters.Add(priezvisko);
+                    objCmd.Parameters.Add(cisloDomu);
+                    objCmd.Parameters.Add(ulica);
+                    objCmd.Parameters.Add(mesto);
+                    objCmd.Parameters.Add(psc);
+
+                    objCmd.Parameters.Add(fotka);
+
+                    Mesto mesto1 = Mestos[random.Next(0, Mestos.Count)];
+                    objCmd.Parameters["rc"].Value = (blaRc + (11 * rc)).ToString();
+                    objCmd.Parameters["meno"].Value = mena[random.Next(0, mena.Count)];
+                    objCmd.Parameters["priezv"].Value = mena[random.Next(0, mena.Count)];
+                    objCmd.Parameters["cisloDomu"].Value = random.Next(1, 1000);
+                    objCmd.Parameters["ulica"].Value = mesto1.Ulice[random.Next(0, mesto1.Ulice.Count)];
+                    objCmd.Parameters["mesto"].Value = mesto1.Nazov;
+                    objCmd.Parameters["psc"].Value = mesto1.PSC;
+
+                    //objCmd.Parameters["foto"].Value = File.ReadAllBytes("vp/" + fotkyVodicov[random.Next(0, fotkyVodicov.Length)] + ".jpg");
+
+
+                    try
+                    {
+                        objCmd.ExecuteNonQuery();
+                    }
+                    catch (Exception)
+                    {
+                        i--;
+                        break;
+
+                    }
+
+                    rc++;
+                    if (rc == 10)
+                    {
+                        break;
+                    }
+                }
                 Console.WriteLine("VODIC pridany " + i);
             }
         }
+
+        public static void PridajNaklady()
+        {
+            DataTable jazdy = new DataTable();
+            using (OracleCommand cmd = new OracleCommand("select id_jazdy,datJazd_od, datJazd_do from jazda", orcl))
+            {
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    jazdy = new DataTable();
+                    jazdy.Load(reader);
+                }
+            }
+
+            int index = 0;
+            for (int i = 0; i < jazdy.Rows.Count; i++)
+            {
+                DateTime pom = Convert.ToDateTime(jazdy.Rows[i].ItemArray[1]);
+
+                while (pom <= Convert.ToDateTime(jazdy.Rows[i].ItemArray[2]))
+                {
+                    try
+                    {
+                        index++;
+                        var sql = "INSERT INTO Naklady (id_nakladu, id_jazdy,id_typu_nakladov,hodnota, kedy) " +
+                                  "VALUES (:id_nakladu, :id_jazdy, :id_typu_nakladov,:hodnota, :kedy)";
+
+                        using (OracleCommand command = new OracleCommand(sql, orcl))
+                        {
+
+                            command.Parameters.Add("id_nakladu", index);
+                            command.Parameters.Add("id_jazdy", jazdy.Rows[i].ItemArray[0]);
+                            command.Parameters.Add("id_typu_nakladov", random.Next(0, 5));
+                            command.Parameters.Add("hodnota", random.NextDouble() * (100 - 5) + 5);
+
+                            command.Parameters.Add("kedy", RandomDateWithTime(pom, pom.AddHours(12)));
+
+
+                            pom = pom.AddHours(12);
+                            command.ExecuteNonQuery();
+
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                Console.WriteLine($"naklady pridane {i}");
+            }
+        }
+
     }
 }
+
 
